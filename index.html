@@ -1,0 +1,188 @@
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Message Share Tool - MATIN</title>
+
+    <style>
+        /* 💡 កែសម្រួល Body ឱ្យដើរពេញអេក្រង់ និងគ្មានចន្លោះទំនេរ (Margin) */
+        body {
+            font-family: Arial, sans-serif;
+            background: #111;
+            color: white;
+            text-align: center;
+            margin: 0;
+            padding: 20px; /* ទុកចន្លោះបន្តិចពីគែមអេក្រង់ */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh; /* ឱ្យកម្ពស់យ៉ាងហោចណាស់ស្មើអេក្រង់ */
+        }
+
+        h2 {
+            margin-top: 10px;
+            margin-bottom: 20px;
+            font-size: 28px;
+        }
+
+        /* 💡 កែសម្រួល Input/Textarea ឱ្យដើរពេញទទឹងអេក្រង់ (មាន margin សងខាង) */
+        textarea, input {
+            width: 100%; /* ដើរពេញទទឹង Parent */
+            max-width: 400px; /* កុំឱ្យវាធំពេកលើ Tablet */
+            padding: 15px; /* កើន padding ឱ្យងាយស្រួលសរសេរ */
+            margin: 10px 0;
+            border-radius: 8px;
+            border: none;
+            background: #222; /* ប្តូរពណ៌ឱ្យស្រួលមើល */
+            color: white;
+            font-size: 16px; /* ហាម Browser មិនឱ្យ Zoom ពេលចុចសរសេរ */
+            box-sizing: border-box; /* រក្សាទទឹង 100% រាប់ទាំង padding */
+        }
+
+        /* 💡 កែសម្រួលប៊ូតុងឱ្យធំ ងាយស្រួលចុច (Mobile-friendly) */
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin: 15px 0;
+            width: 100%;
+            max-width: 400px;
+            justify-content: center;
+        }
+
+        button {
+            flex: 1; /* ឱ្យប៊ូតុងទាំងពីរមានទំហំស្មើគ្នា */
+            padding: 15px 0;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+
+        button:active {
+            opacity: 0.8; /* ឱ្យមាន Effect ពេលចុច */
+        }
+
+        .generate {
+            background: #ff3b3b;
+            color: white;
+        }
+
+        .share {
+            background: #2ecc71;
+            color: white;
+        }
+
+        /* 💡 កែសម្រួលកន្លែងបង្ហាញលទ្ធផល ឱ្យមើលទៅស្អាត និងពេញទទឹង */
+        #output {
+            margin-top: 20px;
+            background: #222;
+            padding: 15px;
+            border-radius: 10px;
+            width: 100%;
+            max-width: 400px;
+            height: 250px; /* បង្កើនកម្ពស់បន្តិច */
+            overflow-y: auto; /* អនុញ្ញាតឱ្យអូសចុះឡើង */
+            text-align: left; /* ឱ្យអក្សរនៅខាងឆ្វេង ស្រួលមើលលទ្ធផល */
+            font-family: monospace; /* ឱ្យអក្សរស្មើគ្នា ស្រួលមើលរាប់លេខ */
+            box-sizing: border-box;
+            border: 1px solid #333;
+        }
+
+        /* 💡 បន្ថែម CSS សម្រាប់អក្សរ BY:MATIN នៅពីក្រោមបង្អស់ */
+        .footer-credit {
+            margin-top: auto; /* ឱ្យវាលោតទៅក្រោមគេបង្អស់ */
+            padding-top: 20px;
+            font-size: 12px;
+            /* 💡 ប្តូរពណ៌ទៅជាពណ៌ផ្កាឈូក */
+            color: #ff69b4; /* ពណ៌ផ្កាឈូក (Pink) */
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+    </style>
+
+</head>
+
+<body>
+
+    <h2>CLONE TEXT</h2>
+
+    <textarea id="message" rows="4" placeholder="សរសេរសារនៅទីនេះ... (Write message)"></textarea>
+
+    <input type="number" id="count" placeholder="ចំនួនដង (Number e.g. 10000)">
+
+    <div class="button-group">
+        <button class="generate" onclick="generate()">បង្កើតសារ (Generate)</button>
+        <button class="share" onclick="shareMsg()">ចែករំលែក (Share)</button>
+    </div>
+
+    <div id="output">លទ្ធផលនឹងបង្ហាញនៅទីនេះ...</div>
+
+    <div class="footer-credit">BY:MATIN</div>
+
+    <script>
+        let finalMessage = "";
+
+        function generate() {
+            let msg = document.getElementById("message").value;
+            let count = document.getElementById("count").value;
+
+            // 💡 បន្ថែមការពិនិត្យ (Validation) ខ្លះៗ
+            if (!msg) {
+                alert("សូមសរសេរសារសិន!");
+                return;
+            }
+            if (!count || count <= 0) {
+                alert("សូមដាក់ចំនួនដងឱ្យត្រឹមត្រូវ!");
+                return;
+            }
+
+            finalMessage = "";
+            let out = "";
+
+            // 💡 កម្រិតចំនួនអតិបរមាដើម្បីកុំឱ្យទូរស័ព្ទគាំង (ឧទាហរណ៍៖ ១០០០០)
+            if (count > 10000) {
+                alert("ចំនួនច្រើនពេកហើយ! សូមដាក់ក្រោម ១០០០០ ដើម្បីការពារការគាំងទូរស័ព្ទ។");
+                return;
+            }
+
+            for (let i = 1; i <= count; i++) {
+                finalMessage += msg + "\n";
+                // 💡 ប្រើ element innerText ជំនួស innerHTML ដើម្បីការពារការដាក់កូដ HTML
+                out += i + ". " + msg + "<br>";
+            }
+
+            // 💡 បង្ហាញលទ្ធផលដោយប្រើ textContent គឺមានសុវត្ថិភាពជាង (ប៉ុន្តែបើបងចង់ប្រើ <br> ត្រូវប្រើ innerHTML ដូចដើម)
+            document.getElementById("output").innerHTML = out;
+            
+            // 💡 បន្ទាប់ពីបង្កើតរួច ឱ្យវាអូសចុះទៅក្រោមគេបង្អស់ដោយស្វ័យប្រវត្តិ
+            let outputDiv = document.getElementById("output");
+            outputDiv.scrollTop = outputDiv.scrollHeight;
+        }
+
+        function shareMsg() {
+            // 💡 ពិនិត្យមើលថាសារត្រូវបានបង្កើតឬនៅ
+            if (!finalMessage) {
+                alert("សូមចុចប៊ូតុង 'បង្កើតសារ' សិន មុននឹងចែករំលែក!");
+                return;
+            }
+
+            if (navigator.share) {
+                navigator.share({
+                    title: "សារពី MATIN Tool",
+                    text: finalMessage
+                })
+                .then(() => console.log('ដោះស្រាយជោគជ័យ'))
+                .catch((error) => console.log('មានបញ្ហាពេលចែករំលែក:', error));
+            } else {
+                // 💡 បើ Browser មិន Support ឱ្យវា Copy ជំនួសវិញ (Optional)
+                navigator.clipboard.writeText(finalMessage).then(function() {
+                    alert("Browser បងមិនគាំទ្រការ Share ផ្ទាល់ទេ! ប៉ុន្តែយើងបាន Copy សារនេះទៅក្នុង Clipboard ហើយ បងអាចយកទៅ Pass បាន។");
+                }, function(err) {
+                    alert("សោកស្តាយ! Browser មិនគាំទ្រការ Share ឡើយ។");
+                });
+            }
+        }
+    </script>
+</body>
